@@ -168,7 +168,6 @@ class ResourceGenerator
 
         foreach ($this->getTableColumns() as $column) {
             $name = $column['name'];
-
             // set column label
             $label = $this->formatLabel($name);
 
