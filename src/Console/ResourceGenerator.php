@@ -16,8 +16,8 @@ class ResourceGenerator
      * @var array
      */
     protected $formats = [
-        'form_field'  => "\$form->%s('%s', __('%s'))",
-        'show_field'  => "\$show->field('%s', __('%s'))",
+        'form_field' => "\$form->%s('%s', __('%s'))",
+        'show_field' => "\$show->field('%s', __('%s'))",
         'grid_column' => "\$grid->column('%s', __('%s'))",
     ];
 
@@ -36,14 +36,14 @@ class ResourceGenerator
      * @var array
      */
     protected $fieldTypeMapping = [
-        'ip'          => 'ip',
-        'email'       => 'email|mail',
-        'password'    => 'password|pwd',
-        'url'         => 'url|link|src|href',
+        'ip' => 'ip',
+        'email' => 'email|mail',
+        'password' => 'password|pwd',
+        'url' => 'url|link|src|href',
         'phonenumber' => 'mobile|phone',
-        'color'       => 'color|rgb',
-        'image'       => 'image|img|avatar|pic|picture|cover',
-        'file'        => 'file|attachment',
+        'color' => 'color|rgb',
+        'image' => 'image|img|avatar|pic|picture|cover',
+        'file' => 'file|attachment',
     ];
 
     /**
@@ -213,13 +213,11 @@ class ResourceGenerator
     {
         $listColumn = [];
         // get prefix and name table
-        $table = $this->model->getConnection()->getTablePrefix().$this->model->getTable();
+        $table = $this->model->getConnection()->getTablePrefix() . $this->model->getTable();
         // get schema manager
         $schema = Schema::getColumns($table);
-        if (!empty($schema))
-        {
-            foreach ($schema as $column)
-            {
+        if (!empty($schema)) {
+            foreach ($schema as $column) {
                 $listColumn[$column['name']] = $column;
             }
         }
