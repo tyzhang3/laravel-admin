@@ -5,12 +5,20 @@ namespace Encore\Admin;
 use Closure;
 use Encore\Admin\Auth\Database\Menu;
 use Encore\Admin\Controllers\AuthController;
+use Encore\Admin\Controllers\UserController;
+use Encore\Admin\Controllers\RoleController;
+use Encore\Admin\Controllers\PermissionController;
+use Encore\Admin\Controllers\MenuController;
+use Encore\Admin\Controllers\LogController;
+use Encore\Admin\Auth\Database\Administrator;
+use Encore\Admin\Controllers\HandleController;
 use Encore\Admin\Layout\Content;
 use Encore\Admin\Traits\HasAssets;
 use Encore\Admin\Widgets\Navbar;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 use InvalidArgumentException;
 
 /**
@@ -306,38 +314,80 @@ class Admin
      */
     public function routes()
     {
+        // 配置验证和默认值处理
+        $config = $this->validateAdminConfig();
+        
         $attributes = [
-            'prefix'     => config('admin.route.prefix'),
-            'middleware' => config('admin.route.middleware'),
+            'prefix' => $config['prefix'],
+            'middleware' => $config['middleware'],
+            'as' => $config['as'],
         ];
-
-        app('router')->group($attributes, function ($router) {
-
-            /* @var \Illuminate\Support\Facades\Route $router */
-            $router->namespace('\Encore\Admin\Controllers')->group(function ($router) {
-
-                /* @var \Illuminate\Routing\Router $router */
-                $router->resource('auth/users', 'UserController')->names('admin.auth.users');
-                $router->resource('auth/roles', 'RoleController')->names('admin.auth.roles');
-                $router->resource('auth/permissions', 'PermissionController')->names('admin.auth.permissions');
-                $router->resource('auth/menu', 'MenuController', ['except' => ['create']])->names('admin.auth.menu');
-                $router->resource('auth/logs', 'LogController', ['only' => ['index', 'destroy']])->names('admin.auth.logs');
-
-                $router->post('_handle_form_', 'HandleController@handleForm')->name('admin.handle-form');
-                $router->post('_handle_action_', 'HandleController@handleAction')->name('admin.handle-action');
-                $router->get('_handle_selectable_', 'HandleController@handleSelectable')->name('admin.handle-selectable');
-                $router->get('_handle_renderable_', 'HandleController@handleRenderable')->name('admin.handle-renderable');
-            });
-
-            $authController = config('admin.auth.controller', AuthController::class);
-
-            /* @var \Illuminate\Routing\Router $router */
-            $router->get('auth/login', $authController.'@getLogin')->name('admin.login');
-            $router->post('auth/login', $authController.'@postLogin');
-            $router->get('auth/logout', $authController.'@getLogout')->name('admin.logout');
-            $router->get('auth/setting', $authController.'@getSetting')->name('admin.setting');
-            $router->put('auth/setting', $authController.'@putSetting');
+        
+        // 路由组定义
+        Route::group($attributes, function () {
+            $this->loadAdminRoutes();
         });
+    }
+
+    /**
+     * Validate admin configuration and return normalized values.
+     *
+     * @return array
+     */
+    protected function validateAdminConfig(): array
+    {
+        // 前缀验证
+        $prefix = config('admin.route.prefix', 'admin');
+        if (!is_string($prefix) || empty(trim($prefix))) {
+            throw new InvalidArgumentException('Admin route prefix must be a non-empty string');
+        }
+        
+        // 中间件验证
+        $middleware = config('admin.route.middleware', ['web', 'admin']);
+        if (!is_array($middleware) || empty($middleware)) {
+            throw new InvalidArgumentException('Admin route middleware must be a non-empty array');
+        }
+        
+        // 别名验证
+        $as = config('admin.route.as', 'admin.');
+        if (!is_string($as) || empty(trim($as))) {
+            throw new InvalidArgumentException('Admin route name prefix must be a non-empty string');
+        }
+        
+        return [
+            'prefix' => trim($prefix, '/'),
+            'middleware' => $middleware,
+            'as' => rtrim($as, '.') . '.',
+        ];
+    }
+
+    /**
+     * Load admin routes with validation.
+     *
+     * @return void
+     */
+    protected function loadAdminRoutes()
+    {
+        // 控制器存在性验证
+        $controllers = [
+            'auth' => config('admin.auth.controller', AuthController::class),
+            'user' => config('admin.database.users_model', Administrator::class),
+        ];
+        
+        foreach ($controllers as $type => $class) {
+            if (!class_exists($class)) {
+                throw new \RuntimeException("Required {$type} controller/model class {$class} not found");
+            }
+        }
+
+        // 加载独立的路由文件
+        $routeFile = __DIR__.'/../routes/admin.php';
+        
+        if (file_exists($routeFile)) {
+            require $routeFile;
+        } else {
+            throw new \RuntimeException('Admin routes file not found');
+        }
     }
 
     /**

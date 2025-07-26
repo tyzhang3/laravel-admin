@@ -6,6 +6,7 @@ use Encore\Admin\Layout\Content;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 
@@ -42,6 +43,7 @@ class AdminServiceProvider extends ServiceProvider
      */
     protected $routeMiddleware = [
         'admin.auth'       => Middleware\Authenticate::class,
+        'admin.guest'      => Middleware\RedirectIfAuthenticated::class,
         'admin.pjax'       => Middleware\Pjax::class,
         'admin.log'        => Middleware\LogOperation::class,
         'admin.permission' => Middleware\Permission::class,
@@ -82,8 +84,6 @@ class AdminServiceProvider extends ServiceProvider
 
         $this->registerPublishing();
 
-        $this->compatibleBlade();
-
         Blade::directive('box', function ($title) {
             return "<?php \$box = new \Encore\Admin\Widgets\Box({$title}, '";
         });
@@ -100,10 +100,35 @@ class AdminServiceProvider extends ServiceProvider
      */
     protected function ensureHttps()
     {
-        $is_admin = Str::startsWith(request()->getRequestUri(), '/'.ltrim(config('admin.route.prefix'), '/'));
-        if ((config('admin.https') || config('admin.secure')) && $is_admin) {
-            url()->forceScheme('https');
-            $this->app['request']->server->set('HTTPS', true);
+        // 获取配置
+        $httpsEnabled = config('admin.https') || config('admin.secure');
+        if (!$httpsEnabled) {
+            return;
+        }
+        
+        // 规范化前缀处理
+        $adminPrefix = trim(config('admin.route.prefix', 'admin'), '/');
+        if (empty($adminPrefix)) {
+            return;
+        }
+        
+        // 安全的URL路径检查
+        $request = $this->app['request'];
+        $requestUri = $request->getRequestUri();
+        $requestPath = parse_url($requestUri, PHP_URL_PATH) ?: $requestUri;
+        
+        // 严格的路径匹配
+        $normalizedPath = trim($requestPath, '/');
+        $isAdminPath = $normalizedPath === $adminPrefix || 
+                       strpos($normalizedPath, $adminPrefix . '/') === 0;
+        
+        if ($isAdminPath) {
+            // 确保HTTPS强制生效
+            if (!$request->isSecure()) {
+                url()->forceScheme('https');
+                $request->server->set('HTTPS', 'on');
+                $request->server->set('SERVER_PORT', 443);
+            }
         }
     }
 
@@ -116,29 +141,15 @@ class AdminServiceProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->publishes([__DIR__.'/../config' => config_path()], 'laravel-admin-config');
-            if (version_compare($this->app->version(), '9.0.0', '>=')) {
-                $this->publishes([__DIR__.'/../resources/lang' => base_path('lang')], 'laravel-admin-lang');
-            } else {
-                $this->publishes([__DIR__.'/../resources/lang' => resource_path('lang')], 'laravel-admin-lang');
-            }
+            // Laravel 12统一使用lang_path()辅助函数
+            $this->publishes([
+                __DIR__.'/../resources/lang' => lang_path()
+            ], 'laravel-admin-lang');
             $this->publishes([__DIR__.'/../database/migrations' => database_path('migrations')], 'laravel-admin-migrations');
             $this->publishes([__DIR__.'/../resources/assets' => public_path('vendor/laravel-admin')], 'laravel-admin-assets');
         }
     }
 
-    /**
-     * Remove default feature of double encoding enable in laravel 5.6 or later.
-     *
-     * @return void
-     */
-    protected function compatibleBlade()
-    {
-        $reflectionClass = new \ReflectionClass('\Illuminate\View\Compilers\BladeCompiler');
-
-        if ($reflectionClass->hasMethod('withoutDoubleEncoding')) {
-            Blade::withoutDoubleEncoding();
-        }
-    }
 
     /**
      * Extends laravel router.
@@ -197,14 +208,42 @@ class AdminServiceProvider extends ServiceProvider
      */
     protected function registerRouteMiddleware()
     {
-        // register route middleware.
+        // 验证中间件配置有效性
+        $this->validateMiddlewareConfig();
+        
+        // 使用Laravel 12推荐的门面方式
         foreach ($this->routeMiddleware as $key => $middleware) {
-            app('router')->aliasMiddleware($key, $middleware);
+            if (!class_exists($middleware)) {
+                throw new \InvalidArgumentException("Middleware class {$middleware} does not exist");
+            }
+            Route::aliasMiddleware($key, $middleware);
         }
-
-        // register middleware group.
-        foreach ($this->middlewareGroups as $key => $middleware) {
-            app('router')->middlewareGroup($key, $middleware);
+        
+        foreach ($this->middlewareGroups as $key => $middlewares) {
+            $validatedMiddlewares = [];
+            foreach ($middlewares as $middleware) {
+                if (is_string($middleware) && !class_exists($middleware) && !in_array($middleware, $this->routeMiddleware)) {
+                    throw new \InvalidArgumentException("Invalid middleware: {$middleware}");
+                }
+                $validatedMiddlewares[] = $middleware;
+            }
+            Route::middlewareGroup($key, $validatedMiddlewares);
+        }
+    }
+    
+    /**
+     * Validate middleware configuration.
+     *
+     * @return void
+     */
+    protected function validateMiddlewareConfig()
+    {
+        $requiredKeys = ['admin.auth', 'admin.guest'];
+        
+        foreach ($requiredKeys as $key) {
+            if (!isset($this->routeMiddleware[$key])) {
+                throw new \RuntimeException("Required route middleware '{$key}' not defined");
+            }
         }
     }
 }

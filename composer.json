@@ -12,17 +12,24 @@
         }
     ],
     "require": {
-        "php": ">=7.0.0",
-        "symfony/dom-crawler": "~3.1|~4.0|~5.0",
-        "laravel/framework": ">=5.5",
-        "doctrine/dbal": "2.*|3.*"
+        "php": "^8.2",
+        "ext-json": "*",
+        "ext-pdo": "*",
+        "ext-mbstring": "*",
+        "ext-openssl": "*",
+        "ext-fileinfo": "*",
+        "ext-gd": "*",
+        "laravel/framework": "^12.0",
+        "symfony/dom-crawler": "^7.0",
+        "doctrine/dbal": "^3.0|^4.0"
     },
     "require-dev": {
-        "laravel/laravel": ">=5.5",
-        "fzaninotto/faker": "~1.4",
-        "intervention/image": "~2.3",
-        "laravel/browser-kit-testing": "^6.0",
-        "spatie/phpunit-watcher": "^1.22.0"
+        "phpunit/phpunit": "^10.0|^11.0",
+        "laravel/laravel": "^12.0",
+        "orchestra/testbench": "^9.0",
+        "fakerphp/faker": "^1.23",
+        "intervention/image": "^3.0",
+        "laravel/browser-kit-testing": "^7.0"
     },
     "autoload": {
         "psr-4": {
@@ -44,9 +51,14 @@
     "scripts": {
         "test": "./vendor/bin/phpunit"
     },
+    "conflict": {
+        "laravel/framework": "<12.0"
+    },
     "suggest": {
-        "intervention/image": "Required to handling and manipulation upload images (~2.3).",
-        "spatie/eloquent-sortable": "Required to built orderable gird."
+        "intervention/image": "Required to handling and manipulation upload images (^3.0).",
+        "spatie/eloquent-sortable": "Required to built orderable gird.",
+        "ext-imagick": "Required for image manipulation",
+        "ext-gd": "Required for basic image manipulation"
     },
     "extra": {
         "laravel": {
