@@ -3,6 +3,7 @@
 namespace Encore\Admin;
 
 use Encore\Admin\Layout\Content;
+use Encore\Admin\Facades\Admin;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Blade;
@@ -145,7 +146,7 @@ class AdminServiceProvider extends ServiceProvider
     {
         // 调用Admin类的routes方法注册内置路由
         $this->app->booted(function () {
-            \Encore\Admin\Admin::routes();
+            Admin::routes();
         });
     }
 
