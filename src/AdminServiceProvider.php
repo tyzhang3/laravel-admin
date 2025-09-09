@@ -208,10 +208,7 @@ class AdminServiceProvider extends ServiceProvider
      */
     protected function registerRouteMiddleware()
     {
-        // 验证中间件配置有效性
-        $this->validateMiddlewareConfig();
-        
-        // 使用Laravel 12推荐的门面方式
+        // 首先注册路由中间件别名
         foreach ($this->routeMiddleware as $key => $middleware) {
             if (!class_exists($middleware)) {
                 throw new \InvalidArgumentException("Middleware class {$middleware} does not exist");
@@ -219,31 +216,16 @@ class AdminServiceProvider extends ServiceProvider
             Route::aliasMiddleware($key, $middleware);
         }
         
+        // 然后注册中间件组
         foreach ($this->middlewareGroups as $key => $middlewares) {
             $validatedMiddlewares = [];
             foreach ($middlewares as $middleware) {
-                if (is_string($middleware) && !class_exists($middleware) && !in_array($middleware, $this->routeMiddleware)) {
+                if (is_string($middleware) && !class_exists($middleware) && !isset($this->routeMiddleware[$middleware])) {
                     throw new \InvalidArgumentException("Invalid middleware: {$middleware}");
                 }
                 $validatedMiddlewares[] = $middleware;
             }
             Route::middlewareGroup($key, $validatedMiddlewares);
-        }
-    }
-    
-    /**
-     * Validate middleware configuration.
-     *
-     * @return void
-     */
-    protected function validateMiddlewareConfig()
-    {
-        $requiredKeys = ['admin.auth', 'admin.guest'];
-        
-        foreach ($requiredKeys as $key) {
-            if (!isset($this->routeMiddleware[$key])) {
-                throw new \RuntimeException("Required route middleware '{$key}' not defined");
-            }
         }
     }
 }
