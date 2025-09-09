@@ -14,27 +14,29 @@ class AdminTablesSeeder extends Seeder
      */
     public function run()
     {
-        // create a user.
-        Administrator::truncate();
-        Administrator::create([
-            'username' => 'admin',
-            'password' => Hash::make('admin'),
-            'name'     => 'Administrator',
-        ]);
+        try {
+            // create a user.
+            Administrator::truncate();
+            $adminUser = Administrator::create([
+                'username' => 'admin',
+                'password' => Hash::make('admin'),
+                'name'     => 'Administrator',
+            ]);
 
-        // create a role.
-        Role::truncate();
-        Role::create([
-            'name' => 'Administrator',
-            'slug' => 'administrator',
-        ]);
+            // create a role.
+            Role::truncate();
+            $administratorRole = Role::create([
+                'name' => 'Administrator',
+                'slug' => 'administrator',
+            ]);
 
-        // add role to user.
-        Administrator::first()->roles()->save(Role::first());
+            // add role to user.
+            $adminUser->roles()->save($administratorRole);
 
         //create a permission
         Permission::truncate();
-        Permission::insert([
+        // 创建所有权限
+        $permissions = [
             [
                 'name'        => 'All permission',
                 'slug'        => '*',
@@ -60,14 +62,42 @@ class AdminTablesSeeder extends Seeder
                 'http_path'   => '/auth/setting',
             ],
             [
-                'name'        => 'Auth management',
-                'slug'        => 'auth.management',
+                'name'        => 'Users management',
+                'slug'        => 'auth.users',
                 'http_method' => '',
-                'http_path'   => "/auth/roles\r\n/auth/permissions\r\n/auth/menu\r\n/auth/logs",
+                'http_path'   => "/auth/users*\r\n/auth/users/*",
             ],
-        ]);
+            [
+                'name'        => 'Roles management',
+                'slug'        => 'auth.roles',
+                'http_method' => '',
+                'http_path'   => "/auth/roles*\r\n/auth/roles/*",
+            ],
+            [
+                'name'        => 'Permissions management',
+                'slug'        => 'auth.permissions',
+                'http_method' => '',
+                'http_path'   => "/auth/permissions*\r\n/auth/permissions/*",
+            ],
+            [
+                'name'        => 'Menu management',
+                'slug'        => 'auth.menu',
+                'http_method' => '',
+                'http_path'   => "/auth/menu*\r\n/auth/menu/*",
+            ],
+            [
+                'name'        => 'Operation log',
+                'slug'        => 'auth.logs',
+                'http_method' => '',
+                'http_path'   => "/auth/logs*\r\n/auth/logs/*",
+            ],
+        ];
 
-        Role::first()->permissions()->save(Permission::first());
+        Permission::insert($permissions);
+
+        // 为管理员角色分配所有权限
+        $administratorRole = Role::first();
+        $administratorRole->permissions()->attach(Permission::all()->pluck('id')->toArray());
 
         // add default menus.
         Menu::truncate();
@@ -124,6 +154,46 @@ class AdminTablesSeeder extends Seeder
         ]);
 
         // add role to menu.
-        Menu::find(2)->roles()->save(Role::first());
+        $adminMenu = Menu::find(2);
+        if ($adminMenu) {
+            $adminMenu->roles()->save($administratorRole);
+        }
+
+        // 验证权限分配
+        $this->verifyPermissions($adminUser, $administratorRole);
+        
+        echo "Laravel Admin 权限设置完成！\n";
+        echo "用户名: admin\n";
+        echo "密码: admin\n";
+        echo "角色: Administrator\n";
+        echo "权限数量: " . $administratorRole->permissions()->count() . "\n";
+        
+        } catch (\Exception $e) {
+            echo "权限设置失败: " . $e->getMessage() . "\n";
+            throw $e;
+        }
+    }
+
+    /**
+     * 验证权限分配是否正确
+     */
+    private function verifyPermissions($user, $role)
+    {
+        // 验证用户是否拥有角色
+        if (!$user->roles()->where('id', $role->id)->exists()) {
+            throw new \Exception("用户角色分配失败");
+        }
+
+        // 验证角色是否拥有权限
+        if ($role->permissions()->count() === 0) {
+            throw new \Exception("角色权限分配失败");
+        }
+
+        // 验证用户是否为管理员
+        if (!$user->isRole('administrator')) {
+            throw new \Exception("管理员权限验证失败");
+        }
+
+        echo "权限验证通过！\n";
     }
 }

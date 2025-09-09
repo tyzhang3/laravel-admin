@@ -78,6 +78,10 @@ class AdminServiceProvider extends ServiceProvider
 
         $this->ensureHttps();
 
+        // 注册Laravel Admin内置路由
+        $this->registerAdminRoutes();
+
+        // 加载自定义路由文件（如果存在）
         if (file_exists($routes = admin_path('routes.php'))) {
             $this->loadRoutesFrom($routes);
         }
@@ -130,6 +134,19 @@ class AdminServiceProvider extends ServiceProvider
                 $request->server->set('SERVER_PORT', 443);
             }
         }
+    }
+
+    /**
+     * Register Laravel Admin routes.
+     *
+     * @return void
+     */
+    protected function registerAdminRoutes()
+    {
+        // 调用Admin类的routes方法注册内置路由
+        $this->app->booted(function () {
+            \Encore\Admin\Admin::routes();
+        });
     }
 
     /**
