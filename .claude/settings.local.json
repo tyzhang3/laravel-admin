@@ -4,8 +4,12 @@
       "Bash(composer:*)",
       "Bash(php:*)",
       "Bash(git config:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git tag:*)"
     ],
     "deny": []
-  }
+  },
+  "outputStyle": "Explanatory"
 }
