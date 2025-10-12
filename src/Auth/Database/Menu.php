@@ -75,7 +75,16 @@ class Menu extends Model
             $query->with('roles');
         }
 
-        return $query->selectRaw('*, '.$orderColumn.' ROOT')->orderByRaw($byOrder)->get()->toArray();
+        $results = $query->selectRaw('*, '.$orderColumn.' ROOT')->orderByRaw($byOrder)->get()->toArray();
+
+        // 确保字符编码正确处理
+        foreach ($results as &$result) {
+            if (isset($result['title'])) {
+                $result['title'] = mb_convert_encoding($result['title'], 'UTF-8', 'UTF-8,GBK,GB2312,ISO-8859-1');
+            }
+        }
+
+        return $results;
     }
 
     /**
