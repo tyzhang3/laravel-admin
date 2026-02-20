@@ -21,13 +21,86 @@ use Encore\Admin\Controllers\AuthController;
 */
 
 Route::namespace('Encore\Admin\Controllers')->group(function () {
-    // 认证相关路由
     $authController = config('admin.auth.controller', AuthController::class);
-    Route::get('auth/login', [$authController, 'getLogin'])->name('admin.login');
-    Route::post('auth/login', [$authController, 'postLogin']);
-    Route::get('auth/logout', [$authController, 'getLogout'])->name('admin.logout');
-    Route::get('auth/setting', [$authController, 'getSetting'])->name('admin.setting');
-    Route::put('auth/setting', [$authController, 'putSetting']);
+    $loginMethod = config('admin.auth.login_method', 'password');
+    $selectedLoginMethod = in_array($loginMethod, ['password', 'openid'], true) ? $loginMethod : 'password';
+
+    $authRoutes = config('admin.auth.routes', [
+        [
+            'method' => 'GET',
+            'uri' => 'auth/login',
+            'action' => 'getLogin',
+            'name' => 'login',
+            'login_method' => 'password',
+            'middleware' => ['admin.guest'],
+            'without_middleware' => ['admin.auth'],
+        ],
+        [
+            'method' => 'POST',
+            'uri' => 'auth/login',
+            'action' => 'postLogin',
+            'login_method' => 'password',
+            'without_middleware' => ['admin.auth'],
+        ],
+        [
+            'method' => 'GET',
+            'uri' => 'auth/logout',
+            'action' => 'getLogout',
+            'name' => 'logout',
+            'login_method' => 'common',
+        ],
+        [
+            'method' => 'GET',
+            'uri' => 'auth/setting',
+            'action' => 'getSetting',
+            'name' => 'setting',
+            'login_method' => 'common',
+        ],
+        [
+            'method' => 'PUT',
+            'uri' => 'auth/setting',
+            'action' => 'putSetting',
+            'login_method' => 'common',
+        ],
+    ]);
+
+    foreach ($authRoutes as $routeConfig) {
+        $routeLoginMethod = $routeConfig['login_method'] ?? 'common';
+        if (
+            $routeLoginMethod !== 'common'
+            && $routeLoginMethod !== $selectedLoginMethod
+        ) {
+            continue;
+        }
+
+        $controller = $routeConfig['controller'] ?? $authController;
+        $method = $routeConfig['method'] ?? 'GET';
+        $uri = $routeConfig['uri'] ?? null;
+        $action = $routeConfig['action'] ?? null;
+
+        if (!$uri || !$action) {
+            continue;
+        }
+
+        $methods = array_map('strtoupper', (array) $method);
+        if (in_array('GET', $methods, true) && !in_array('HEAD', $methods, true)) {
+            $methods[] = 'HEAD';
+        }
+
+        $route = Route::match($methods, $uri, [$controller, $action]);
+
+        if (!empty($routeConfig['name'])) {
+            $route->name($routeConfig['name']);
+        }
+
+        if (!empty($routeConfig['middleware'])) {
+            $route->middleware($routeConfig['middleware']);
+        }
+
+        if (!empty($routeConfig['without_middleware'])) {
+            $route->withoutMiddleware($routeConfig['without_middleware']);
+        }
+    }
 
     // 资源管理路由
     Route::resource('auth/users', UserController::class)->names('admin.auth.users');

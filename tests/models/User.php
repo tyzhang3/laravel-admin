@@ -2,15 +2,26 @@
 
 namespace Tests\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Tests\Models\Factories\UserFactory;
 
 class User extends Model
 {
+    use HasFactory;
+
     protected $table = 'test_users';
+
+    protected $guarded = [];
 
     protected $appends = ['full_name', 'position'];
 
     protected $casts = ['data' => 'array'];
+
+    protected static function newFactory()
+    {
+        return UserFactory::new();
+    }
 
     public function profile()
     {

@@ -131,6 +131,9 @@ return [
         // Add "remember me" to login form
         'remember' => true,
 
+        // Login method switch: password | openid
+        'login_method' => env('ADMIN_LOGIN_METHOD', 'password'),
+
         // Redirect to the specified URI when user is not authorized.
         'redirect_to' => 'auth/login',
 
@@ -138,6 +141,84 @@ return [
         'excepts' => [
             'auth/login',
             'auth/logout',
+        ],
+
+        /*
+        |--------------------------------------------------------------------------
+        | Auth routes
+        |--------------------------------------------------------------------------
+        |
+        | You can configure admin auth routes here. This is useful when you need
+        | multiple login methods (for example password + OpenID).
+        |
+        | Supported keys:
+        | - method: string|array   HTTP method(s), default GET
+        | - uri: string            route URI under admin prefix
+        | - action: string         method name on controller
+        | - controller: class      optional controller class (defaults to auth.controller)
+        | - name: string           route name without "admin." prefix
+        | - middleware: array      optional route middleware
+        | - without_middleware: array optional middleware to remove
+        |
+        */
+        'routes' => [
+            [
+                'method' => 'GET',
+                'uri' => 'auth/login',
+                'action' => 'getLogin',
+                'name' => 'login',
+                'login_method' => 'password',
+                'middleware' => ['admin.guest'],
+                'without_middleware' => ['admin.auth'],
+            ],
+            [
+                'method' => 'POST',
+                'uri' => 'auth/login',
+                'action' => 'postLogin',
+                'login_method' => 'password',
+                'without_middleware' => ['admin.auth'],
+            ],
+            [
+                'method' => 'GET',
+                'uri' => 'auth/logout',
+                'action' => 'getLogout',
+                'name' => 'logout',
+                'login_method' => 'common',
+            ],
+            [
+                'method' => 'GET',
+                'uri' => 'auth/setting',
+                'action' => 'getSetting',
+                'name' => 'setting',
+                'login_method' => 'common',
+            ],
+            [
+                'method' => 'PUT',
+                'uri' => 'auth/setting',
+                'action' => 'putSetting',
+                'login_method' => 'common',
+            ],
+            // Example OpenID routes:
+            // [
+            //     'method' => 'GET',
+            //     'uri' => 'auth/openid/redirect',
+            //     'action' => 'redirectToOpenId',
+            //     'controller' => App\Admin\Controllers\AuthController::class,
+            //     'name' => 'openid.redirect',
+            //     'login_method' => 'openid',
+            //     'middleware' => ['admin.guest'],
+            //     'without_middleware' => ['admin.auth'],
+            // ],
+            // [
+            //     'method' => 'GET',
+            //     'uri' => 'auth/openid/callback',
+            //     'action' => 'handleOpenIdCallback',
+            //     'controller' => App\Admin\Controllers\AuthController::class,
+            //     'name' => 'openid.callback',
+            //     'login_method' => 'openid',
+            //     'middleware' => ['admin.guest'],
+            //     'without_middleware' => ['admin.auth'],
+            // ],
         ],
     ],
 

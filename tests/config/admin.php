@@ -48,6 +48,10 @@ return [
      * Laravel-admin auth setting.
      */
     'auth' => [
+        'controller' => Encore\Admin\Controllers\AuthController::class,
+
+        'guard' => 'admin',
+
         'guards' => [
             'admin' => [
                 'driver'   => 'session',
@@ -59,6 +63,76 @@ return [
             'admin' => [
                 'driver' => 'eloquent',
                 'model'  => Encore\Admin\Auth\Database\Administrator::class,
+            ],
+        ],
+
+        'remember' => true,
+
+        'login_method' => 'password',
+
+        'redirect_to' => 'auth/login',
+
+        'excepts' => [
+            'auth/login',
+            'auth/logout',
+            'auth/openid/login',
+            'auth/openid/callback',
+        ],
+
+        'routes' => [
+            [
+                'method' => 'GET',
+                'uri' => 'auth/login',
+                'action' => 'getLogin',
+                'name' => 'login',
+                'login_method' => 'password',
+                'middleware' => ['admin.guest'],
+                'without_middleware' => ['admin.auth'],
+            ],
+            [
+                'method' => 'POST',
+                'uri' => 'auth/login',
+                'action' => 'postLogin',
+                'login_method' => 'password',
+                'without_middleware' => ['admin.auth'],
+            ],
+            [
+                'method' => 'GET',
+                'uri' => 'auth/openid/login',
+                'action' => 'getLogin',
+                'name' => 'openid.login',
+                'login_method' => 'openid',
+                'middleware' => ['admin.guest'],
+                'without_middleware' => ['admin.auth'],
+            ],
+            [
+                'method' => 'GET',
+                'uri' => 'auth/openid/callback',
+                'action' => 'getLogin',
+                'name' => 'openid.callback',
+                'login_method' => 'openid',
+                'middleware' => ['admin.guest'],
+                'without_middleware' => ['admin.auth'],
+            ],
+            [
+                'method' => 'GET',
+                'uri' => 'auth/logout',
+                'action' => 'getLogout',
+                'name' => 'logout',
+                'login_method' => 'common',
+            ],
+            [
+                'method' => 'GET',
+                'uri' => 'auth/setting',
+                'action' => 'getSetting',
+                'name' => 'setting',
+                'login_method' => 'common',
+            ],
+            [
+                'method' => 'PUT',
+                'uri' => 'auth/setting',
+                'action' => 'putSetting',
+                'login_method' => 'common',
             ],
         ],
     ],

@@ -19,7 +19,7 @@ class Authenticate
     {
         \config(['auth.defaults.guard' => 'admin']);
 
-        $redirectTo = admin_base_path(config('admin.auth.redirect_to', 'auth/login'));
+        $redirectTo = admin_base_path($this->resolveRedirectTo());
 
         if (Admin::guard()->guest() && !$this->shouldPassThrough($request)) {
             return redirect()->to($redirectTo);
@@ -39,6 +39,7 @@ class Authenticate
     {
         // 下面的路由不验证登陆
         $excepts = config('admin.auth.excepts', []);
+        $excepts[] = $this->resolveRedirectTo();
 
         array_delete($excepts, [
             '_handle_action_',
@@ -56,5 +57,22 @@ class Authenticate
 
                 return $request->is($except);
             });
+    }
+
+    protected function resolveRedirectTo(): string
+    {
+        $loginMethod = config('admin.auth.login_method', 'password');
+        $defaultLoginPath = $loginMethod === 'openid' ? 'auth/openid/login' : 'auth/login';
+        $redirectTo = config('admin.auth.redirect_to');
+
+        if (empty($redirectTo)) {
+            return $defaultLoginPath;
+        }
+
+        if ($loginMethod === 'openid' && $redirectTo === 'auth/login') {
+            return $defaultLoginPath;
+        }
+
+        return $redirectTo;
     }
 }
