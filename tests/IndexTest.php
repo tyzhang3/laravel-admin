@@ -14,6 +14,15 @@ class IndexTest extends TestCase
     public function testIndex()
     {
         $this->visit('admin/')
+            ->seeElement('link[href*="AdminLTE/dist/css/adminlte.min.css"]')
+            ->seeElement('link[href*="AdminLTE/plugins/fontawesome-free/css/all.min.css"]')
+            ->seeElement('script[src*="AdminLTE/plugins/bootstrap/js/bootstrap.bundle.min.js"]')
+            ->seeElement('script[src*="AdminLTE/dist/js/adminlte.min.js"]')
+            ->seeElement('a[data-widget=pushmenu]')
+            ->seeElement('ul.nav-sidebar')
+            ->seeElement('div.card')
+            ->dontSee('plugins/jQuery/jQuery-2.1.4.min.js')
+            ->dontSee('dist/css/skins/')
             ->see('Dashboard')
             ->see('Description...')
 

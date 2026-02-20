@@ -56,7 +56,7 @@ class Box extends Widget implements Renderable
             $this->footer($footer);
         }
 
-        $this->class('box');
+        $this->class('card');
     }
 
     /**
@@ -117,7 +117,7 @@ class Box extends Widget implements Renderable
     public function collapsable()
     {
         $this->tools[] =
-            '<button class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>';
+            '<button class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button>';
 
         return $this;
     }
@@ -131,12 +131,12 @@ class Box extends Widget implements Renderable
      */
     public function scrollable($options = [], $nodeSelector = '')
     {
-        $this->id = uniqid('box-slim-scroll-');
+        $this->id = uniqid('card-overlay-scroll-');
         $scrollOptions = json_encode($options);
-        $nodeSelector = $nodeSelector ?: '.box-body';
+        $nodeSelector = $nodeSelector ?: '.card-body';
 
         $this->script = <<<SCRIPT
-$("#{$this->id} {$nodeSelector}").slimScroll({$scrollOptions});
+$("#{$this->id} {$nodeSelector}").overlayScrollbars({$scrollOptions});
 SCRIPT;
 
         return $this;
@@ -150,7 +150,7 @@ SCRIPT;
     public function removable()
     {
         $this->tools[] =
-            '<button class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>';
+            '<button class="btn btn-tool" data-card-widget="remove"><i class="fas fa-times"></i></button>';
 
         return $this;
     }
@@ -169,7 +169,7 @@ SCRIPT;
         }
 
         $styles = array_map(function ($style) {
-            return 'box-'.$style;
+            return 'card-'.$style;
         }, $styles);
 
         $this->class = $this->class.' '.implode(' ', $styles);
@@ -184,7 +184,7 @@ SCRIPT;
      */
     public function solid()
     {
-        return $this->style('solid');
+        return $this->style('outline');
     }
 
     /**

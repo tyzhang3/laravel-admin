@@ -88,7 +88,7 @@ trait BelongsToRelation
       </div>
       <div class="modal-body">
       <div class="loading text-center">
-        <i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
+        <i class="fas fa-spinner fa-pulse fa-3x fa-fw"></i>
         </div>
       </div>
       <div class="modal-footer">
@@ -113,7 +113,7 @@ HTML;
 .belongsto.modal tr {
     cursor: pointer;
 }
-.belongsto.modal .box {
+.belongsto.modal .card {
     border-top: none;
     margin-bottom: 0;
     box-shadow: none;
@@ -132,7 +132,7 @@ HTML;
     height: 60px !important;
 }
 
-.belongsto.modal .grid-box .box-footer {
+.belongsto.modal .grid-box .card-footer {
     border-top: none !important;
 }
 STYLE;

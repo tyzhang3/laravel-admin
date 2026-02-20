@@ -1,6 +1,6 @@
 <span class="grid-selector" data-toggle="modal" data-target="#{{ $modal }}" key="{{ $key }}" data-val="{{ $original }}">
    <a href="javascript:void(0)" class="text-muted">
-       <i class="fa fa-check-square-o"></i>&nbsp;&nbsp;
+       <i class="far fa-check-square"></i>&nbsp;&nbsp;
        <span class="text">{{ $value }}</span>
    </a>
 </span>
@@ -10,7 +10,7 @@
         cursor: pointer;
     }
 
-    .belongsto.modal .box {
+    .belongsto.modal .card {
         border-top: none;
         margin-bottom: 0;
         box-shadow: none;
@@ -32,7 +32,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="loading text-center">
-                        <i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
+                        <i class="fas fa-spinner fa-pulse fa-3x fa-fw"></i>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -71,15 +71,11 @@
     var load = function (url) {
         $.get(url, function (data) {
             $modal.find('.modal-body').html(data);
-            $modal.find('.select').iCheck({
-                radioClass:'iradio_minimal-blue',
-                checkboxClass:'icheckbox_minimal-blue'
-            });
-            $modal.find('.box-header:first').hide();
+            $modal.find('.card-header:first').hide();
 
             $modal.find('input.select').each(function (index,    el) {
                 if ($(el).val() == selected) {
-                    $(el).iCheck('toggle');
+                    $(el).prop('checked', true);
                 }
             });
         });
@@ -89,8 +85,10 @@
         $related = $(e.relatedTarget);
         selected = $related.data('val');
         load("{!! $url !!}");
-    }).on('ifChecked', 'input.select', function (e) {
-        selected = $(this).val();
+    }).on('change', 'input.select', function () {
+        if (this.checked) {
+            selected = $(this).val();
+        }
     }).find('.modal-footer .submit').click(function () {
         update(function (data) {
             $related.data('val', selected);
@@ -114,15 +112,11 @@
     var load = function (url) {
         $.get(url, function (data) {
             $modal.find('.modal-body').html(data);
-            $modal.find('.select').iCheck({
-                radioClass:'iradio_minimal-blue',
-                checkboxClass:'icheckbox_minimal-blue'
-            });
-            $modal.find('.box-header:first').hide();
+            $modal.find('.card-header:first').hide();
 
             $modal.find('input.select').each(function (index, el) {
                 if ($.inArray($(el).val().toString(), selected) >=0 ) {
-                    $(el).iCheck('toggle');
+                    $(el).prop('checked', true);
                 }
             });
         });
@@ -135,13 +129,15 @@
         });
 
         load("{!! $url !!}");
-    }).on('ifChecked', 'input.select', function (e) {
+    }).on('change', 'input.select', function () {
         var val = $(this).val().toString();
-        if (selected.indexOf(val) < 0) {
-            selected.push(val);
+        if (this.checked) {
+            if (selected.indexOf(val) < 0) {
+                selected.push(val);
+            }
+            return;
         }
-    }).on('ifUnchecked', 'input.select', function (e) {
-        var val = $(this).val().toString();
+
         var index = selected.indexOf(val);
         if (index !== -1) {
             selected.splice(index, 1);
@@ -167,9 +163,14 @@
         load($(this).attr('href'));
         e.preventDefault();
     }).on('click', 'tr', function (e) {
-        $(this).find('input.select').iCheck('toggle');
+        var $input = $(this).find('input.select');
+        @if($relation == \Encore\Admin\Grid\Displayers\BelongsTo::class)
+        $input.prop('checked', true).trigger('change');
+        @else
+        $input.prop('checked', !$input.prop('checked')).trigger('change');
+        @endif
         e.preventDefault();
-    }).on('submit', '.box-header form', function (e) {
+    }).on('submit', '.card-header form', function (e) {
         load($(this).attr('action')+'&'+$(this).serialize());
         e.preventDefault();
         return false;

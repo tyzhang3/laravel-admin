@@ -1,4 +1,4 @@
-<div class="dropdown pull-right column-selector">
+<div class="dropdown float-right column-selector">
     <button type="button" class="btn btn-sm btn-instagram dropdown-toggle" data-toggle="dropdown">
         <i class="fa fa-table"></i>
         &nbsp;
@@ -84,11 +84,7 @@ $('.column-select-submit').on('click', function () {
 });
 
 $('.column-select-all').on('click', function () {
-    $('.column-select-item').iCheck('check');
+    $('.column-select-item').prop('checked', true).trigger('change');
     return false;
-});
-
-$('.column-select-item').iCheck({
-    checkboxClass:'icheckbox_minimal-blue'
 });
 </script>

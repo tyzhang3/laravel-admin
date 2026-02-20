@@ -15,7 +15,7 @@
     </div>
     @endif
         <div class="input-group-addon">
-            <i class="fa fa-{{ $icon }}"></i>
+            <i class="{{ admin_icon_class($icon) }}"></i>
         </div>
 
     <input type="{{ $type }}" class="form-control {{ $id }}" placeholder="{{$placeholder}}" name="{{$name}}" value="{{ request($name, $value) }}">

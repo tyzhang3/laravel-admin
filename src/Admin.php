@@ -33,7 +33,7 @@ class Admin
      *
      * @var string
      */
-    const VERSION = '1.8.17';
+    const VERSION = '2.0.0';
 
     /**
      * @var Navbar
@@ -368,16 +368,16 @@ class Admin
      */
     protected function loadAdminRoutes()
     {
-        // 控制器存在性验证
-        $controllers = [
-            'auth' => config('admin.auth.controller', AuthController::class),
-            'user' => config('admin.database.users_model', Administrator::class),
-        ];
-        
-        foreach ($controllers as $type => $class) {
-            if (!class_exists($class)) {
-                throw new \RuntimeException("Required {$type} controller/model class {$class} not found");
-            }
+        $authController = config('admin.auth.controller', AuthController::class);
+
+        // Fresh installs may not have app-level admin auth controller yet.
+        if (!class_exists($authController)) {
+            config(['admin.auth.controller' => AuthController::class]);
+        }
+
+        $usersModel = config('admin.database.users_model', Administrator::class);
+        if (!class_exists($usersModel)) {
+            throw new \RuntimeException("Required user model class {$usersModel} not found");
         }
 
         // 加载独立的路由文件

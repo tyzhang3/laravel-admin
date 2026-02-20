@@ -175,6 +175,40 @@ if (!function_exists('admin_trans')) {
     }
 }
 
+if (!function_exists('admin_icon_class')) {
+
+    /**
+     * Normalize icon class for Font Awesome 5.
+     *
+     * @param string $icon
+     * @param string $style
+     *
+     * @return string
+     */
+    function admin_icon_class($icon = '', $style = 'fas')
+    {
+        $icon = trim((string) $icon);
+
+        if ($icon === '') {
+            return $style.' fa-circle';
+        }
+
+        if (strpos($icon, ' ') !== false) {
+            return $icon;
+        }
+
+        if (\Illuminate\Support\Str::startsWith($icon, 'fa-')) {
+            return $style.' '.$icon;
+        }
+
+        if (\Illuminate\Support\Str::startsWith($icon, ['glyphicon-', 'icon-'])) {
+            return $icon;
+        }
+
+        return $style.' fa-'.$icon;
+    }
+}
+
 if (!function_exists('array_delete')) {
 
     /**

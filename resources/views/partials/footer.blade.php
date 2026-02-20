@@ -1,7 +1,7 @@
 <!-- Main Footer -->
 <footer class="main-footer">
     <!-- To the right -->
-    <div class="pull-right hidden-xs">
+    <div class="float-right d-none d-sm-inline">
         @if(config('admin.show_environment'))
             <strong>Env</strong>&nbsp;&nbsp; {!! config('app.env') !!}
         @endif

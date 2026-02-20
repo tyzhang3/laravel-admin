@@ -1,5 +1,21 @@
 # Change log
 
+## v2.0.0（2026-02-20）
+
+- 前端框架升级到 AdminLTE 3.2.0。
+- 图标体系升级到 Font Awesome 5。
+- 移除 `admin.skin` 与旧 `admin.layout` 语义。
+- 新增 `admin.ui.*` 配置命名空间。
+- 布局类从 `box-*` 迁移到 `card-*`。
+- 移除 iCheck，统一使用原生 `change` 事件。
+- `Grid::editable()` 内部实现切换为 inline-edit 组件。
+- 测试升级：资源路径、布局类与交互断言同步到 AdminLTE 3。
+- 修复 `admin:install` 安装期路由加载问题：当 `admin.auth.controller` 尚未生成时，自动回退到内置认证控制器。
+- 修复 `jquery-pjax` 在 jQuery 3 下的兼容性问题（`$.event.props` 已移除）。
+- 修复 pjax 不可用时的运行时初始化问题：`laravel-admin.js` 对 pjax 初始化/刷新/跳转增加保护。
+- 修复 `$.admin.loadScripts` 去重判断逻辑，避免动态脚本被误跳过。
+- 修复 Tempus Dominus 依赖链：日期组件改为使用 AdminLTE 3 自带 moment（`AdminLTE/plugins/moment/moment-with-locales.min.js`）。
+
 ## v1.2.9、v1.3.3、v1.4.1
 
 - 添加用户设置和修改头像功能

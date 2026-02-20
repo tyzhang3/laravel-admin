@@ -25,7 +25,7 @@ class Editable extends AbstractDisplayer
      * @var array
      */
     protected $options = [
-        'emptytext'  => '<i class="fa fa-pencil"></i>',
+        'emptytext'  => '<i class="fas fa-pen"></i>',
     ];
 
     /**
@@ -74,10 +74,7 @@ class Editable extends AbstractDisplayer
      */
     public function select($options = [])
     {
-        $useClosure = false;
-
         if ($options instanceof \Closure) {
-            $useClosure = true;
             $options = $options->call($this, $this->row);
         }
 
@@ -87,11 +84,7 @@ class Editable extends AbstractDisplayer
             $source[] = compact('value', 'text');
         }
 
-        if ($useClosure) {
-            $this->addAttributes(['data-source' => json_encode($source)]);
-        } else {
-            $this->addOptions(compact('source'));
-        }
+        $this->addOptions(compact('source'));
     }
 
     /**
@@ -176,49 +169,83 @@ class Editable extends AbstractDisplayer
      */
     public function display()
     {
-        $this->options['name'] = $column = $this->getName();
-
-        $class = 'grid-editable-'.str_replace(['.', '#', '[', ']'], '-', $column);
-
         $this->buildEditableOptions(func_get_args());
 
-        $options = json_encode($this->options);
-
-        $options = substr($options, 0, -1).<<<'STR'
-    ,
-    "success":function(response, newValue){
-        if (response.status){
-            $.admin.toastr.success(response.message, '', {positionClass:"toast-top-center"});
-        } else {
-            $.admin.toastr.error(response.message, '', {positionClass:"toast-top-center"});
-        }
-    }
-}
-STR;
-
-        Admin::script("$('.$class').editable($options);");
-
-        $this->value = htmlentities($this->value ?? '');
-
-        $attributes = [
-            'href'       => '#',
-            'class'      => "$class",
-            'data-type'  => $this->type,
-            'data-pk'    => "{$this->getKey()}",
-            'data-url'   => "{$this->getResource()}/{$this->getKey()}",
-            'data-value' => "{$this->value}",
+        $data = [
+            'key'      => $this->getKey(),
+            'value'    => $this->getValue(),
+            'display'  => $this->getValue(),
+            'name'     => $this->getPayloadName(),
+            'resource' => $this->getResource(),
+            'trigger'  => "ie-trigger-{$this->getClassName()}",
+            'target'   => "ie-template-{$this->getClassName()}",
         ];
 
-        if (!empty($this->attributes)) {
-            $attributes = array_merge($attributes, $this->attributes);
+        switch ($this->type) {
+            case 'textarea':
+                return Admin::component('admin::grid.inline-edit.textarea', $data + [
+                    'rows' => (int) Arr::get($this->options, 'rows', 5),
+                ]);
+            case 'select':
+                $options = $this->resolveSelectOptions();
+                return Admin::component('admin::grid.inline-edit.select', $data + [
+                    'display' => Arr::get($options, (string) $this->getValue(), ''),
+                    'options' => $options,
+                ]);
+            case 'date':
+                return Admin::component('admin::grid.inline-edit.datetime', $data + [
+                    'format' => 'YYYY-MM-DD',
+                    'locale' => config('app.locale'),
+                ]);
+            case 'datetime':
+                return Admin::component('admin::grid.inline-edit.datetime', $data + [
+                    'format' => 'YYYY-MM-DD HH:mm:ss',
+                    'locale' => config('app.locale'),
+                ]);
+            case 'year':
+                return Admin::component('admin::grid.inline-edit.datetime', $data + [
+                    'format' => 'YYYY',
+                    'locale' => config('app.locale'),
+                ]);
+            case 'month':
+                return Admin::component('admin::grid.inline-edit.datetime', $data + [
+                    'format' => 'MM',
+                    'locale' => config('app.locale'),
+                ]);
+            case 'day':
+                return Admin::component('admin::grid.inline-edit.datetime', $data + [
+                    'format' => 'DD',
+                    'locale' => config('app.locale'),
+                ]);
+            case 'time':
+                return Admin::component('admin::grid.inline-edit.datetime', $data + [
+                    'format' => 'HH:mm:ss',
+                    'locale' => config('app.locale'),
+                ]);
+            case 'combodate':
+                return Admin::component('admin::grid.inline-edit.datetime', $data + [
+                    'format' => Arr::get($this->options, 'format', 'YYYY-MM-DD'),
+                    'locale' => config('app.locale'),
+                ]);
+            case 'text':
+            default:
+                return Admin::component('admin::grid.inline-edit.input', $data + [
+                    'mask' => [],
+                ]);
+        }
+    }
+
+    protected function resolveSelectOptions(): array
+    {
+        $resolved = [];
+        $source = Arr::get($this->options, 'source', []);
+
+        foreach ($source as $option) {
+            if (isset($option['value'])) {
+                $resolved[(string) $option['value']] = (string) Arr::get($option, 'text', '');
+            }
         }
 
-        $attributes = collect($attributes)->map(function ($attribute, $name) {
-            return "$name='$attribute'";
-        })->implode(' ');
-
-        $html = $this->type === 'select' ? '' : $this->value;
-
-        return "<a $attributes>{$html}</a>";
+        return $resolved;
     }
 }

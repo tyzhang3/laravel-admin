@@ -33,7 +33,7 @@ class BelongsToMany extends MultipleSelect
 
     // remove row
     grid.on('click', '.grid-row-remove', function () {
-        val = $(this).data('key').toString();
+        var val = $(this).data('key').toString();
 
         var index = selected.indexOf(val);
         if (index !== -1) {
@@ -53,15 +53,11 @@ class BelongsToMany extends MultipleSelect
     var load = function (url) {
         $.get(url, function (data) {
             modal.find('.modal-body').html(data);
-            modal.find('.select').iCheck({
-                radioClass:'iradio_minimal-blue',
-                checkboxClass:'icheckbox_minimal-blue'
-            });
-            modal.find('.box-header:first').hide();
+            modal.find('.card-header:first').hide();
 
             modal.find('input.select').each(function (index, el) {
                 if ($.inArray($(el).val().toString(), selected) >=0 ) {
-                    $(el).iCheck('toggle');
+                    $(el).prop('checked', true).trigger('change');
                 }
             });
         });
@@ -100,24 +96,27 @@ class BelongsToMany extends MultipleSelect
         load($(this).attr('href'));
         e.preventDefault();
     }).on('click', 'tr', function (e) {
-        $(this).find('input.select').iCheck('toggle');
+        var input = $(this).find('input.select');
+        input.prop('checked', !input.prop('checked')).trigger('change');
         e.preventDefault();
-    }).on('submit', '.box-header form', function (e) {
+    }).on('submit', '.card-header form', function (e) {
         load($(this).attr('action')+'&'+$(this).serialize());
         e.preventDefault();
         return false;
-    }).on('ifChecked', 'input.select', function (e) {
-        if (selected.indexOf($(this).val()) < 0) {
-            selected.push($(this).val());
+    }).on('change', 'input.select', function (e) {
+        if (this.checked && selected.indexOf($(this).val()) < 0) {
+            selected.push($(this).val().toString());
             rows[$(e.target).val()] = $(e.target).parents('tr');
-        }
-    }).on('ifUnchecked', 'input.select', function (e) {
+        } else if (!this.checked) {
            var val = $(this).val();
            var index = selected.indexOf(val);
            if (index !== -1) {
                selected.splice(index, 1);
                delete rows[$(e.target).val()];
            }
+        } else {
+            return;
+        }
     }).find('.modal-footer .submit').click(function () {
         update(function () {
             modal.modal('toggle');

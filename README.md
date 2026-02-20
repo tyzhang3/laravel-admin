@@ -84,11 +84,23 @@ Configurations
 ------------
 The file `config/admin.php` contains an array of configurations, you can find the default configurations in there.
 
-Right to left support
+AdminLTE 3.2 upgrade notes
 ------------
-just go to this path `<YOUR_PROJECT_PATH>\vendor\encore\laravel-admin\src\Traits\HasAssets.php` and modify `$baseCss` array for loading right to left (rtl) version of bootstap and AdminLTE css files.    
-**bootstrap.min.css** change it to **bootstrap.rtl.min.css**    
-**AdminLTE.min.css** change it to **AdminLTE.rtl.min.css**  
+- The frontend is based on **AdminLTE 3.2.0** and **Font Awesome 5**.
+- Legacy `admin.skin` and old `admin.layout` options were removed.
+- Use `admin.ui.*` to configure UI classes:
+  - `body_class`
+  - `navbar_class`
+  - `sidebar_class`
+  - `brand_class`
+  - `content_class`
+  - `login_class`
+- Core assets are loaded from:
+  - `vendor/laravel-admin/AdminLTE/dist/css/adminlte.min.css`
+  - `vendor/laravel-admin/AdminLTE/dist/js/adminlte.min.js`
+  - `vendor/laravel-admin/AdminLTE/plugins/bootstrap/js/bootstrap.bundle.min.js`
+  - `vendor/laravel-admin/AdminLTE/plugins/fontawesome-free/css/all.min.css`
+- `Grid::editable()` now uses built-in inline-edit components instead of bootstrap3-editable.
 
 ## Extensions
 
@@ -151,8 +163,8 @@ Other
 
 + [Laravel](https://laravel.com/)
 + [AdminLTE](https://adminlte.io/)
-+ [Datetimepicker](http://eonasdan.github.io/bootstrap-datetimepicker/)
-+ [font-awesome](http://fontawesome.io)
++ [Tempus Dominus Bootstrap 4](https://tempusdominus.github.io/bootstrap-4/)
++ [Font Awesome](https://fontawesome.com/)
 + [moment](http://momentjs.com/)
 + [Google map](https://www.google.com/maps)
 + [Tencent map](http://lbs.qq.com/)
@@ -160,7 +172,7 @@ Other
 + [jquery-pjax](https://github.com/defunkt/jquery-pjax)
 + [Nestable](http://dbushell.github.io/Nestable/)
 + [toastr](http://codeseven.github.io/toastr/)
-+ [X-editable](http://github.com/vitalets/x-editable)
++ Inline-edit components (built-in)
 + [bootstrap-number-input](https://github.com/wpic/bootstrap-number-input)
 + [fontawesome-iconpicker](https://github.com/itsjavi/fontawesome-iconpicker)
 + [sweetalert2](https://github.com/sweetalert2/sweetalert2)

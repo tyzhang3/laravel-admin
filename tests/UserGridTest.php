@@ -49,6 +49,16 @@ class UserGridTest extends TestCase
             ->seeInElement("a[href=\"{$urlNew}\"]", 'New');
     }
 
+    public function testInlineEditableRender()
+    {
+        $this->seedsTable(1);
+
+        $this->visit('admin/users')
+            ->seeElement('a[data-toggle=popover][data-name=username][class*=ie-trigger-]')
+            ->see('_edit_inline')
+            ->see('ie-template-');
+    }
+
     protected function seedsTable($count = 100)
     {
         UserModel::factory()

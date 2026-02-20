@@ -24,7 +24,7 @@
 
 </head>
 
-<body class="hold-transition {{config('admin.skin')}} {{join(' ', config('admin.layout'))}}">
+<body class="{{ config('admin.ui.body_class', 'hold-transition sidebar-mini layout-fixed') }}">
 
 @if($alert = config('admin.top_alert'))
     <div style="text-align: center;padding: 5px;font-size: 12px;background-color: #ffffd5;color: #ff0000;">
@@ -38,7 +38,7 @@
 
     @include('admin::partials.sidebar')
 
-    <div class="content-wrapper" id="pjax-container">
+    <div class="{{ config('admin.ui.content_class', 'content-wrapper') }}" id="pjax-container">
         {!! Admin::style() !!}
         <div id="app">
         @yield('content')
@@ -51,7 +51,7 @@
 
 </div>
 
-<button id="totop" title="Go to top" style="display: none;"><i class="fa fa-chevron-up"></i></button>
+<button id="totop" title="Go to top" style="display: none;"><i class="fas fa-chevron-up"></i></button>
 
 <script>
     function LA() {}

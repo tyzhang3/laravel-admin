@@ -26,9 +26,9 @@
             $popover.find('.ie-container').datetimepicker({
                 inline: true,
                 format: '{{ $format }}',
-                date: $input.val(),
+                defaultDate: $input.val(),
                 locale: '{{ $locale }}'
-            }).on('dp.change', function (event) {
+            }).on('change.datetimepicker', function (event) {
                 var date = event.date.format('{{ $format }}');
                 $input.val(date);
             });
@@ -44,5 +44,4 @@
     </script>
 
 @endsection
-
 

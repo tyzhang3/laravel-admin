@@ -11,7 +11,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="loading text-center">
-                        <i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
+                        <i class="fas fa-spinner fa-pulse fa-3x fa-fw"></i>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -37,9 +37,14 @@ modal.on('show.bs.modal', function (e) {
     load($(this).attr('href'));
     e.preventDefault();
 }).on('click', 'tr', function (e) {
-    $(this).find('input.select').iCheck('toggle');
+    var $input = $(this).find('input.select');
+    @if($multiple)
+    $input.prop('checked', !$input.prop('checked')).trigger('change');
+    @else
+    $input.prop('checked', true).trigger('change');
+    @endif
     e.preventDefault();
-}).on('submit', '.box-header form', function (e) {
+}).on('submit', '.card-header form', function (e) {
     load($(this).attr('action')+'&'+$(this).serialize());
     return false;
 })
@@ -55,31 +60,30 @@ modal.on('show.bs.modal', function (e) {
     var load = function (url) {
         $.get(url, function (data) {
             modal.find('.modal-body').html(data);
-            modal.find('input.select').iCheck({
-                radioClass:'iradio_minimal-blue',
-                checkboxClass:'icheckbox_minimal-blue'
-            });
-            modal.find('.box-header:first').hide();
+            modal.find('.card-header:first').hide();
 
             modal.find('input.select').each(function (index, el) {
                 if ($.inArray($(el).val().toString(), value) >=0 ) {
-                    $(el).iCheck('toggle');
+                    $(el).prop('checked', true);
                 }
             });
         });
     };
 
-    modal.on('ifChecked', 'input.select', function (e) {
-        if ($(this).val().length == 0) {
+    modal.on('change', 'input.select', function () {
+        var current = $(this).val().toString();
+        if (current.length === 0) {
             return;
         }
 
-        if (value.indexOf($(this).val()) < 0) {
-            value.push($(this).val());
+        if (this.checked) {
+            if (value.indexOf(current) < 0) {
+                value.push(current);
+            }
+            return;
         }
-    }).on('ifUnchecked', 'input.select', function (e) {
-        var val = $(this).val();
-        var index = value.indexOf(val);
+
+        var index = value.indexOf(current);
         if (index !== -1) {
             value.splice(index, 1);
         }
@@ -99,22 +103,20 @@ modal.on('show.bs.modal', function (e) {
     var load = function (url) {
         $.get(url, function (data) {
             modal.find('.modal-body').html(data);
-            modal.find('input.select').iCheck({
-                radioClass:'iradio_minimal-blue',
-                checkboxClass:'icheckbox_minimal-blue'
-            });
-            modal.find('.box-header:first').hide();
+            modal.find('.card-header:first').hide();
 
             modal.find('input.select').each(function (index, el) {
                 if ($(el).val() == value) {
-                    $(el).iCheck('toggle');
+                    $(el).prop('checked', true);
                 }
             });
         });
     };
 
-    modal.on('ifChecked', 'input.select', function (e) {
-        value = $(this).val();
+    modal.on('change', 'input.select', function () {
+        if (this.checked) {
+            value = $(this).val();
+        }
     }).find('.modal-footer .submit').click(function () {
         pickInput.val(value);
         modal.modal('toggle');
@@ -134,7 +136,7 @@ $('.picker-file-preview').on('click', 'a.remove', function () {
 
     var input = pickInput.val().split(separator);
 
-    var index = input.indexOf(current);value
+    var index = input.indexOf(current);
     if (index !== -1) {
         input.splice(index, 1);
     }
@@ -186,7 +188,7 @@ refresh = function () {
         cursor: pointer;
     }
 
-    .picker.modal .box {
+    .picker.modal .card {
         border-top: none;
         margin-bottom: 0;
         box-shadow: none;
@@ -239,4 +241,3 @@ refresh = function () {
     }
     @endif
 </style>
-

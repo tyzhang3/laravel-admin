@@ -20,15 +20,13 @@
 @endif
 
 <script>
-$('.{{ $all }}').iCheck({checkboxClass:'icheckbox_minimal-blue'});
-
-$('.{{ $all }}').on('ifChanged', function(event) {
+$('.{{ $all }}').on('change', function () {
     if (this.checked) {
-        $('.{{ $row }}-checkbox').iCheck('check');
+        $('.{{ $row }}-checkbox').prop('checked', true).trigger('change');
     } else {
-        $('.{{ $row }}-checkbox').iCheck('uncheck');
+        $('.{{ $row }}-checkbox').prop('checked', false).trigger('change');
     }
-}).on('ifClicked', function () {
+
     if (this.checked) {
         $.admin.grid.selects = {};
     } else {

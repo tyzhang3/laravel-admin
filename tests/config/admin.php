@@ -200,26 +200,19 @@ return [
         ],
     ],
 
-    /*
-     * @see https://adminlte.io/docs/2.4/layout
-     */
-    'skin' => 'skin-blue-light',
-
-    /*
-    |---------------------------------------------------------|
-    |LAYOUT OPTIONS | fixed                                   |
-    |               | layout-boxed                            |
-    |               | layout-top-nav                          |
-    |               | sidebar-collapse                        |
-    |               | sidebar-mini                            |
-    |---------------------------------------------------------|
-     */
-    'layout' => ['sidebar-mini', 'sidebar-collapse'],
+    'ui' => [
+        'body_class' => 'hold-transition sidebar-mini layout-fixed',
+        'navbar_class' => 'main-header navbar navbar-expand navbar-white navbar-light',
+        'sidebar_class' => 'main-sidebar sidebar-dark-primary elevation-4',
+        'brand_class' => 'brand-link',
+        'content_class' => 'content-wrapper',
+        'login_class' => 'hold-transition login-page',
+    ],
 
     /*
      * Version displayed in footer.
      */
-    'version' => '1.5.x-dev',
+    'version' => '2.x',
 
     /*
      * Settings for extensions.

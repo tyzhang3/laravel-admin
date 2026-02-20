@@ -23,7 +23,7 @@ EOT;
         $selected = trans('admin.grid_items_selected');
 
         return <<<EOT
-$('.{$row}-checkbox').iCheck({checkboxClass:'icheckbox_minimal-blue'}).on('ifChanged', function () {
+$('.{$row}-checkbox').on('change', function () {
 
     var id = $(this).data('id');
 
@@ -34,16 +34,7 @@ $('.{$row}-checkbox').iCheck({checkboxClass:'icheckbox_minimal-blue'}).on('ifCha
         \$.admin.grid.unselect(id);
         $(this).closest('tr').css('background-color', '');
     }
-}).on('ifClicked', function () {
-
-    var id = $(this).data('id');
-
-    if (this.checked) {
-        $.admin.grid.unselect(id);
-    } else {
-        $.admin.grid.select(id);
-    }
-
+    
     var selected = $.admin.grid.selected().length;
 
     if (selected > 0) {

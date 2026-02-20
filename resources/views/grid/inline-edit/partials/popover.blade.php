@@ -19,7 +19,9 @@ $('.{{ $trigger }}').popover({
     }
 }).on('shown.bs.popover', function (e) {
 
-    var $popover = $($(this).data('bs.popover').$tip[0]).find('.ie-content');
+    var popover = $(this).data('bs.popover');
+    var $tip = popover && popover.tip ? $(popover.tip) : $('.popover').last();
+    var $popover = $tip.find('.ie-content');
     var $display = $(this).parents('.ie-wrap').find('.ie-display');
     var $trigger = $(this);
 

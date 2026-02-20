@@ -13,17 +13,15 @@ class Checkbox extends MultipleSelect
     protected $groups = null;
 
     protected static $css = [
-        '/vendor/laravel-admin/AdminLTE/plugins/iCheck/all.css',
+        '/vendor/laravel-admin/AdminLTE/plugins/icheck-bootstrap/icheck-bootstrap.min.css',
     ];
 
-    protected static $js = [
-        '/vendor/laravel-admin/AdminLTE/plugins/iCheck/icheck.min.js',
-    ];
+    protected static $js = [];
 
     /**
      * @var string
      */
-    protected $cascadeEvent = 'ifChanged';
+    protected $cascadeEvent = 'change';
 
     /**
      * Set options.
@@ -120,7 +118,7 @@ class Checkbox extends MultipleSelect
      */
     public function render()
     {
-        $this->script = "$('{$this->getElementClassSelector()}').iCheck({checkboxClass:'icheckbox_minimal-blue'});";
+        $this->script = '';
 
         $this->addVariables([
             'checked'     => $this->checked,
@@ -133,12 +131,8 @@ class Checkbox extends MultipleSelect
             $checkAllClass = uniqid('check-all-');
 
             $this->script .= <<<SCRIPT
-$('.{$checkAllClass}').iCheck({checkboxClass:'icheckbox_minimal-blue'}).on('ifChanged', function () {
-    if (this.checked) {
-        $('{$this->getElementClassSelector()}').iCheck('check');
-    } else {
-        $('{$this->getElementClassSelector()}').iCheck('uncheck');
-    }
+$('.{$checkAllClass}').on('change', function () {
+    $('{$this->getElementClassSelector()}').prop('checked', this.checked).trigger('change');
 });
 SCRIPT;
             $this->addVariables(['checkAllClass' => $checkAllClass]);

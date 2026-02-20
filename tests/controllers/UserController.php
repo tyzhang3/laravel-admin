@@ -23,7 +23,7 @@ class UserController extends AdminController
 
         $grid->id('ID')->sortable();
 
-        $grid->username();
+        $grid->username()->editable();
         $grid->email();
         $grid->mobile();
         $grid->full_name();

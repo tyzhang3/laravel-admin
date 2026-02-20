@@ -13,7 +13,7 @@
     >
         <span class="ie-display">{{ $display }}</span>
 
-        <i class="fa fa-edit" style="visibility: hidden;"></i>
+        <i class="fas fa-pen" style="visibility: hidden;"></i>
     </a>
 </span>
 
@@ -73,7 +73,7 @@
     $('body').on('click', function (e) {
         if ($(e.target).data('toggle') !== 'popover'
             && $(e.target).parents('[data-toggle="popover"]').length === 0
-            && $(e.target).parents('.popover.in').length === 0) {
+            && $(e.target).parents('.popover.show').length === 0) {
             $('[data-toggle="popover"]').popover('hide');
         }
     });

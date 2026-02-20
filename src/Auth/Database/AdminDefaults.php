@@ -75,7 +75,7 @@ class AdminDefaults
             [
                 'order' => 1,
                 'title' => 'Dashboard',
-                'icon'  => 'fa-bar-chart',
+                'icon'  => 'fa-chart-bar',
                 'uri'   => '/',
             ],
             [

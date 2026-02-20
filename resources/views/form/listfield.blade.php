@@ -36,7 +36,7 @@
                     </td>
 
                     <td style="width: 75px;">
-                        <div class="{{$column}}-remove btn btn-warning btn-sm pull-right">
+                        <div class="{{$column}}-remove btn btn-warning btn-sm float-right">
                             <i class="fa fa-trash">&nbsp;</i>{{ __('admin.remove') }}
                         </div>
                     </td>
@@ -47,7 +47,7 @@
                 <tr>
                     <td></td>
                     <td>
-                        <div class="{{ $column }}-add btn btn-success btn-sm pull-right">
+                        <div class="{{ $column }}-add btn btn-success btn-sm float-right">
                             <i class="fa fa-save"></i>&nbsp;{{ __('admin.new') }}
                         </div>
                     </td>
@@ -66,7 +66,7 @@
             </td>
 
             <td style="width: 75px;">
-                <div class="{{$column}}-remove btn btn-warning btn-sm pull-right">
+                <div class="{{$column}}-remove btn btn-warning btn-sm float-right">
                     <i class="fa fa-trash">&nbsp;</i>{{ __('admin.remove') }}
                 </div>
             </td>

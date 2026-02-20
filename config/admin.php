@@ -344,33 +344,17 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Application Skin
+    | Admin UI classes (AdminLTE 3)
     |--------------------------------------------------------------------------
-    |
-    | This value is the skin of admin pages.
-    | @see https://adminlte.io/docs/2.4/layout
-    |
-    | Supported:
-    |    "skin-blue", "skin-blue-light", "skin-yellow", "skin-yellow-light",
-    |    "skin-green", "skin-green-light", "skin-purple", "skin-purple-light",
-    |    "skin-red", "skin-red-light", "skin-black", "skin-black-light".
-    |
     */
-    'skin' => env('ADMIN_SKIN', 'skin-blue-light'),
-
-    /*
-    |--------------------------------------------------------------------------
-    | Application layout
-    |--------------------------------------------------------------------------
-    |
-    | This value is the layout of admin pages.
-    | @see https://adminlte.io/docs/2.4/layout
-    |
-    | Supported: "fixed", "layout-boxed", "layout-top-nav", "sidebar-collapse",
-    | "sidebar-mini".
-    |
-    */
-    'layout' => ['sidebar-mini', 'sidebar-collapse'],
+    'ui' => [
+        'body_class' => env('ADMIN_BODY_CLASS', 'hold-transition sidebar-mini layout-fixed'),
+        'navbar_class' => env('ADMIN_NAVBAR_CLASS', 'main-header navbar navbar-expand navbar-white navbar-light'),
+        'sidebar_class' => env('ADMIN_SIDEBAR_CLASS', 'main-sidebar sidebar-dark-primary elevation-4'),
+        'brand_class' => env('ADMIN_BRAND_CLASS', 'brand-link'),
+        'content_class' => env('ADMIN_CONTENT_CLASS', 'content-wrapper'),
+        'login_class' => env('ADMIN_LOGIN_CLASS', 'hold-transition login-page'),
+    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -488,4 +472,11 @@ return [
     'extensions' => [
 
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Laravel-admin version label
+    |--------------------------------------------------------------------------
+    */
+    'version' => '2.x',
 ];

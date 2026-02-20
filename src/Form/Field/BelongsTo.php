@@ -39,15 +39,11 @@ class BelongsTo extends Select
     var load = function (url) {
         $.get(url, function (data) {
             modal.find('.modal-body').html(data);
-            modal.find('.select').iCheck({
-                radioClass:'iradio_minimal-blue',
-                checkboxClass:'icheckbox_minimal-blue'
-            });
-            modal.find('.box-header:first').hide();
+            modal.find('.card-header:first').hide();
 
             modal.find('input.select').each(function (index, el) {
                 if ($(el).val() == selected) {
-                    $(el).iCheck('toggle');
+                    $(el).prop('checked', true).trigger('change');
                 }
             });
         });
@@ -77,14 +73,17 @@ class BelongsTo extends Select
         load($(this).attr('href'));
         e.preventDefault();
     }).on('click', 'tr', function (e) {
-        $(this).find('input.select').iCheck('toggle');
+        var input = $(this).find('input.select');
+        input.prop('checked', true).trigger('change');
         e.preventDefault();
-    }).on('submit', '.box-header form', function (e) {
+    }).on('submit', '.card-header form', function (e) {
         load($(this).attr('action')+'&'+$(this).serialize());
         return false;
-    }).on('ifChecked', 'input.select', function (e) {
-        row = $(e.target).parents('tr');
-        selected = $(this).val();
+    }).on('change', 'input.select', function (e) {
+        if (this.checked) {
+            row = $(e.target).parents('tr');
+            selected = $(this).val();
+        }
     }).find('.modal-footer .submit').click(function () {
         update(function () {
             modal.modal('toggle');
