@@ -1,0 +1,62 @@
+name: Tests
+
+on:
+  push:
+    branches: [master, dev]
+  pull_request:
+    branches: [master]
+
+jobs:
+  phpunit:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ["8.2", "8.3"]
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+          MYSQL_DATABASE: laravel_admin_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, pdo, pdo_mysql, fileinfo, gd
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Wait for MySQL
+        run: |
+          for i in {1..30}; do
+            if mysqladmin ping -h 127.0.0.1 --silent; then
+              exit 0
+            fi
+            sleep 2
+          done
+          exit 1
+
+      - name: Run tests
+        env:
+          DB_CONNECTION: mysql
+          MYSQL_HOST: 127.0.0.1
+          MYSQL_DATABASE: laravel_admin_test
+          MYSQL_USER: root
+          MYSQL_PASSWORD: ""
+        run: composer test
