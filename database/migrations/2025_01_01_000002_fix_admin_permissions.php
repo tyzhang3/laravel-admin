@@ -1,10 +1,12 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
+use Encore\Admin\Auth\Database\AdminDefaults;
 use Encore\Admin\Auth\Database\Administrator;
 use Encore\Admin\Auth\Database\Role;
 use Encore\Admin\Auth\Database\Permission;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 return new class extends Migration
 {
@@ -13,22 +15,25 @@ return new class extends Migration
      */
     public function up(): void
     {
+        $administrator = AdminDefaults::administrator();
+        $role = AdminDefaults::role();
+
         // 确保管理员用户存在
-        $adminUser = Administrator::where('username', 'admin')->first();
+        $adminUser = Administrator::where('username', $administrator['username'])->first();
         if (!$adminUser) {
             $adminUser = Administrator::create([
-                'username' => 'admin',
-                'password' => bcrypt('admin'),
-                'name' => 'Administrator',
+                'username' => $administrator['username'],
+                'password' => Hash::make($administrator['password']),
+                'name' => $administrator['name'],
             ]);
         }
 
         // 确保管理员角色存在
-        $administratorRole = Role::where('slug', 'administrator')->first();
+        $administratorRole = Role::where('slug', $role['slug'])->first();
         if (!$administratorRole) {
             $administratorRole = Role::create([
-                'name' => 'Administrator',
-                'slug' => 'administrator',
+                'name' => $role['name'],
+                'slug' => $role['slug'],
             ]);
         }
 
@@ -38,80 +43,13 @@ return new class extends Migration
         }
 
         // 创建或更新权限
-        $permissions = [
-            [
-                'name' => 'All permission',
-                'slug' => '*',
-                'http_method' => '',
-                'http_path' => '*',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Dashboard',
-                'slug' => 'dashboard',
-                'http_method' => 'GET',
-                'http_path' => '/',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Login',
-                'slug' => 'auth.login',
-                'http_method' => '',
-                'http_path' => "/auth/login\n/auth/logout",
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'User setting',
-                'slug' => 'auth.setting',
-                'http_method' => 'GET,PUT',
-                'http_path' => '/auth/setting',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Users management',
-                'slug' => 'auth.users',
-                'http_method' => '',
-                'http_path' => "/auth/users*\n/auth/users/*",
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Roles management',
-                'slug' => 'auth.roles',
-                'http_method' => '',
-                'http_path' => "/auth/roles*\n/auth/roles/*",
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Permissions management',
-                'slug' => 'auth.permissions',
-                'http_method' => '',
-                'http_path' => "/auth/permissions*\n/auth/permissions/*",
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Menu management',
-                'slug' => 'auth.menu',
-                'http_method' => '',
-                'http_path' => "/auth/menu*\n/auth/menu/*",
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Operation log',
-                'slug' => 'auth.logs',
-                'http_method' => '',
-                'http_path' => "/auth/logs*\n/auth/logs/*",
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-        ];
+        $now = now();
+        $permissions = array_map(function ($permission) use ($now) {
+            return array_merge($permission, [
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]);
+        }, AdminDefaults::permissions());
 
         // 批量插入或更新权限
         foreach ($permissions as $permission) {
@@ -140,8 +78,11 @@ return new class extends Migration
     public function down(): void
     {
         // 清理管理员权限分配
-        $adminUser = Administrator::where('username', 'admin')->first();
-        $administratorRole = Role::where('slug', 'administrator')->first();
+        $administrator = AdminDefaults::administrator();
+        $role = AdminDefaults::role();
+
+        $adminUser = Administrator::where('username', $administrator['username'])->first();
+        $administratorRole = Role::where('slug', $role['slug'])->first();
         
         if ($adminUser && $administratorRole) {
             $adminUser->roles()->detach($administratorRole->id);

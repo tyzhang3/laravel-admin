@@ -5,6 +5,7 @@ namespace Encore\Admin\Form\Field;
 use Illuminate\Support\Str;
 use Intervention\Image\Constraint;
 use Intervention\Image\Facades\Image as InterventionImage;
+use Intervention\Image\ImageManager;
 use Intervention\Image\ImageManagerStatic;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
@@ -44,7 +45,7 @@ trait ImageField
     public function callInterventionMethods($target)
     {
         if (!empty($this->interventionCalls)) {
-            $image = ImageManagerStatic::make($target);
+            $image = $this->makeInterventionImage($target);
 
             foreach ($this->interventionCalls as $call) {
                 call_user_func_array(
@@ -73,7 +74,7 @@ trait ImageField
             return $this;
         }
 
-        if (!class_exists(ImageManagerStatic::class)) {
+        if (!$this->interventionAvailable()) {
             throw new \Exception('To use image handling and manipulation, please install [intervention/image] first.');
         }
 
@@ -189,7 +190,7 @@ trait ImageField
             $path = $path.'-'.$name.'.'.$ext;
 
             /** @var \Intervention\Image\Image $image */
-            $image = InterventionImage::make($file);
+            $image = $this->makeInterventionImage($file);
 
             $action = $size[2] ?? 'resize';
             // Resize image with aspect ratio
@@ -207,5 +208,39 @@ trait ImageField
         $this->destroyThumbnail();
 
         return $this;
+    }
+
+    /**
+     * @param mixed $source
+     *
+     * @throws \Exception
+     *
+     * @return mixed
+     */
+    protected function makeInterventionImage($source)
+    {
+        if (class_exists(ImageManagerStatic::class)) {
+            return ImageManagerStatic::make($source);
+        }
+
+        if (class_exists(ImageManager::class)) {
+            return ImageManager::gd()->read($source);
+        }
+
+        if (class_exists(InterventionImage::class)) {
+            return InterventionImage::make($source);
+        }
+
+        throw new \Exception('To use image handling and manipulation, please install [intervention/image] first.');
+    }
+
+    /**
+     * @return bool
+     */
+    protected function interventionAvailable()
+    {
+        return class_exists(ImageManagerStatic::class)
+            || class_exists(ImageManager::class)
+            || class_exists(InterventionImage::class);
     }
 }

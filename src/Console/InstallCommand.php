@@ -2,7 +2,9 @@
 
 namespace Encore\Admin\Console;
 
+use Encore\Admin\Auth\Database\AdminDefaults;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Hash;
 
 class InstallCommand extends Command
 {
@@ -49,9 +51,96 @@ class InstallCommand extends Command
         $this->call('migrate');
 
         $userModel = config('admin.database.users_model');
+        $roleModel = config('admin.database.roles_model');
+        $permissionModel = config('admin.database.permissions_model');
+        $menuModel = config('admin.database.menu_model');
 
         if ($userModel::count() == 0) {
             $this->call('db:seed', ['--class' => \Encore\Admin\Auth\Database\AdminTablesSeeder::class]);
+
+            return;
+        }
+
+        $needRepair = $roleModel::count() == 0
+            || $permissionModel::count() == 0
+            || $menuModel::count() == 0;
+
+        if ($needRepair) {
+            $this->repairAdminData($userModel, $roleModel, $permissionModel, $menuModel);
+        }
+    }
+
+    /**
+     * Repair essential admin data without truncating existing records.
+     *
+     * @param string $userModel
+     * @param string $roleModel
+     * @param string $permissionModel
+     * @param string $menuModel
+     *
+     * @return void
+     */
+    protected function repairAdminData($userModel, $roleModel, $permissionModel, $menuModel)
+    {
+        $administrator = AdminDefaults::administrator();
+        $adminUser = $userModel::firstOrCreate(
+            ['username' => $administrator['username']],
+            [
+                'password' => Hash::make($administrator['password']),
+                'name'     => $administrator['name'],
+            ]
+        );
+
+        $role = AdminDefaults::role();
+        $administratorRole = $roleModel::firstOrCreate(
+            ['slug' => $role['slug']],
+            ['name' => $role['name']]
+        );
+
+        $adminUser->roles()->syncWithoutDetaching([$administratorRole->getKey()]);
+
+        foreach (AdminDefaults::permissions() as $permission) {
+            $permissionModel::updateOrCreate(['slug' => $permission['slug']], $permission);
+        }
+
+        $permissionIds = $permissionModel::query()->pluck('id')->all();
+        $administratorRole->permissions()->syncWithoutDetaching($permissionIds);
+
+        $adminMenu = null;
+        foreach (AdminDefaults::rootMenus() as $menu) {
+            $created = $menuModel::firstOrCreate(
+                [
+                    'parent_id' => 0,
+                    'title'     => $menu['title'],
+                    'uri'       => $menu['uri'],
+                ],
+                [
+                    'order' => $menu['order'],
+                    'icon'  => $menu['icon'],
+                ]
+            );
+
+            if ($menu['uri'] === '' && $menu['title'] === 'Admin') {
+                $adminMenu = $created;
+            }
+        }
+
+        if ($adminMenu) {
+            foreach (AdminDefaults::adminChildMenus() as $menu) {
+                $menuModel::firstOrCreate(
+                    [
+                        'parent_id' => $adminMenu->getKey(),
+                        'title'     => $menu['title'],
+                        'uri'       => $menu['uri'],
+                    ],
+                    [
+                        'order' => $menu['order'],
+                        'icon'  => $menu['icon'],
+                    ]
+                );
+            }
+
+            $adminMenu->roles()->syncWithoutDetaching([$administratorRole->getKey()]);
         }
     }
 
