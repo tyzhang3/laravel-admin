@@ -1,7 +1,8 @@
 # 自定义头部导航条
 
-从版本`1.5.6`开始，可以在顶部导航条上添加html元素了,  打开`app/Admin/bootstrap.php`：
-```php
+从版本`1.5.6`开始，可以在顶部导航条上添加html元素了, 打开`app/Admin/bootstrap.php`：
+
+```
 use Encore\Admin\Facades\Admin;
 
 Admin::navbar(function (\Encore\Admin\Widgets\Navbar $navbar) {
@@ -15,10 +16,11 @@ Admin::navbar(function (\Encore\Admin\Widgets\Navbar $navbar) {
 
 `left`和`right`方法分别用来在头部的左右两边添加内容，方法参数可以是任何可以渲染的对象(实现了`Htmlable`、`Renderable`接口或者包含`__toString()`方法的对象)或字符串
 
-## 左侧添加示例
+## [左侧添加示例](#%E5%B7%A6%E4%BE%A7%E6%B7%BB%E5%8A%A0%E7%A4%BA%E4%BE%8B)
 
 举个例子，比如在左边添加一个搜索条，先创建一个blade视图`resources/views/search-bar.blade.php`：
-```php
+
+```
 <style>
 
 .search-form {
@@ -49,15 +51,18 @@ Admin::navbar(function (\Encore\Admin\Widgets\Navbar $navbar) {
     </div>
 </form>
 ```
+
 然后加入头部导航条：
-```php
+
+```
 $navbar->left(view('search-bar'));
 ```
 
-## 右侧添加示例
+## [右侧添加示例](#%E5%8F%B3%E4%BE%A7%E6%B7%BB%E5%8A%A0%E7%A4%BA%E4%BE%8B)
 
 导航右侧只能添加`<li>`标签, 比如要添加一些提示图标，新建渲染对象`app/Admin/Extensions/Nav/Links.php`
-```php
+
+```
 <?php
 
 namespace App\Admin\Extensions\Nav;
@@ -95,12 +100,14 @@ HTML;
 ```
 
 然后加入头部导航条：
-```php
+
+```
 $navbar->right(new \App\Admin\Extensions\Nav\Links());
 ```
 
 或者用下面的html加入下拉菜单：
-```html
+
+```
 <li class="dropdown notifications-menu">
 <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
   <i class="fa fa-bell-o"></i>
