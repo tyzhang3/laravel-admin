@@ -28,7 +28,7 @@
         "laravel/laravel": "^12.0",
         "orchestra/testbench": "^10.0",
         "fakerphp/faker": "^1.23",
-        "intervention/image": "^3.0",
+        "intervention/image": "^2.7",
         "laravel/browser-kit-testing": "^7.0"
     },
     "autoload": {
@@ -49,13 +49,14 @@
         ]
     },
     "scripts": {
-        "test": "./vendor/bin/phpunit"
+        "test": "./vendor/bin/phpunit",
+        "test:static": "php tests/static_regression_checks.php"
     },
     "conflict": {
         "laravel/framework": "<12.0"
     },
     "suggest": {
-        "intervention/image": "Required to handling and manipulation upload images (^3.0).",
+        "intervention/image": "Required to handling and manipulation upload images (^2.7).",
         "spatie/eloquent-sortable": "Required to built orderable gird.",
         "ext-imagick": "Required for image manipulation",
         "ext-gd": "Required for basic image manipulation"

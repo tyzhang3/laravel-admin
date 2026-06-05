@@ -3,13 +3,11 @@
 namespace Encore\Admin;
 
 use Encore\Admin\Layout\Content;
-use Encore\Admin\Facades\Admin;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Str;
 
 class AdminServiceProvider extends ServiceProvider
 {
@@ -79,10 +77,7 @@ class AdminServiceProvider extends ServiceProvider
 
         $this->ensureHttps();
 
-        // 注册Laravel Admin内置路由
-        $this->registerAdminRoutes();
-
-        // 加载自定义路由文件（如果存在）
+        // Load the installed admin routes file when present.
         if (file_exists($routes = admin_path('routes.php'))) {
             $this->loadRoutesFrom($routes);
         }
@@ -135,19 +130,6 @@ class AdminServiceProvider extends ServiceProvider
                 $request->server->set('SERVER_PORT', 443);
             }
         }
-    }
-
-    /**
-     * Register Laravel Admin routes.
-     *
-     * @return void
-     */
-    protected function registerAdminRoutes()
-    {
-        // 调用Admin类的routes方法注册内置路由
-        $this->app->booted(function () {
-            Admin::routes();
-        });
     }
 
     /**

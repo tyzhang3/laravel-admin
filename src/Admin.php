@@ -5,13 +5,7 @@ namespace Encore\Admin;
 use Closure;
 use Encore\Admin\Auth\Database\Menu;
 use Encore\Admin\Controllers\AuthController;
-use Encore\Admin\Controllers\UserController;
-use Encore\Admin\Controllers\RoleController;
-use Encore\Admin\Controllers\PermissionController;
-use Encore\Admin\Controllers\MenuController;
-use Encore\Admin\Controllers\LogController;
 use Encore\Admin\Auth\Database\Administrator;
-use Encore\Admin\Controllers\HandleController;
 use Encore\Admin\Layout\Content;
 use Encore\Admin\Traits\HasAssets;
 use Encore\Admin\Widgets\Navbar;
@@ -320,7 +314,6 @@ class Admin
         $attributes = [
             'prefix' => $config['prefix'],
             'middleware' => $config['middleware'],
-            'as' => $config['as'],
         ];
         
         // 路由组定义
@@ -338,8 +331,8 @@ class Admin
     {
         // 前缀验证
         $prefix = config('admin.route.prefix', 'admin');
-        if (!is_string($prefix) || empty(trim($prefix))) {
-            throw new InvalidArgumentException('Admin route prefix must be a non-empty string');
+        if (!is_string($prefix)) {
+            throw new InvalidArgumentException('Admin route prefix must be a string');
         }
         
         // 中间件验证
@@ -348,16 +341,9 @@ class Admin
             throw new InvalidArgumentException('Admin route middleware must be a non-empty array');
         }
         
-        // 别名验证
-        $as = config('admin.route.as', 'admin.');
-        if (!is_string($as) || empty(trim($as))) {
-            throw new InvalidArgumentException('Admin route name prefix must be a non-empty string');
-        }
-        
         return [
             'prefix' => trim($prefix, '/'),
             'middleware' => $middleware,
-            'as' => rtrim($as, '.') . '.',
         ];
     }
 
